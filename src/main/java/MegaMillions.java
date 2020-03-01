@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 public class MegaMillions {
 
-    private String file = "C:\\Users\\tomas\\Desktop\\mega_millions.csv";
+    private String file = "mega_millions.csv";
     private List<Integer> allWinningNumbers = getAllWinningNumbers();
     private List<Number> uniqueWinningNumbersWithOccur = getUniqueNumbersWithOccurs(allWinningNumbers);
 
