@@ -1,9 +1,6 @@
 import java.io.*;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MegaMillions {
@@ -15,8 +12,8 @@ public class MegaMillions {
         List<Integer> allWinningNumbers = new ArrayList<>();
         List<Integer> allWinningMegaBall = new ArrayList<>();
         getAllWinningNumbers(allWinningNumbers, allWinningMegaBall);
-        List<Number> winning75Numbers = getUniqueNumbersWithOccurs(allWinningNumbers);
-        List<Number> winningMegaBalls = getUniqueNumbersWithOccurs(allWinningMegaBall);
+        TreeMap<String, Integer> winning75Numbers = getUniqueNumbersWithOccurs(allWinningNumbers);
+        TreeMap<String, Integer> winningMegaBalls = getUniqueNumbersWithOccurs(allWinningMegaBall);
         System.out.println("Top 10 winning numbers:");
         mostPopularNumberFromList(winning75Numbers, 10);
         System.out.println("Top 3 winning mega ball:");
@@ -31,7 +28,7 @@ public class MegaMillions {
         ) {
             while ((line = bufferedReader.readLine()) != null) {
                 addWinningNumbers(line, winningNumbers);
-                addMegaBalls(line,megaBalls);
+                addMegaBalls(line, megaBalls);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -48,7 +45,7 @@ public class MegaMillions {
         }
     }
 
-    public void addMegaBalls(String line, List<Integer> megaBalls){
+    public void addMegaBalls(String line, List<Integer> megaBalls) {
         String[] splitByComma = line.split(",");
         String[] megaBall = splitByComma[2].split(" ");
         for (String ball : megaBall) {
@@ -58,26 +55,45 @@ public class MegaMillions {
         }
     }
 
-    private List<Number> getUniqueNumbersWithOccurs(List<Integer> list) {
-        List<Number> numbersWithOccurs = new ArrayList<>();
-        for (int i = 1; i <= 10000; i++) {
+    private TreeMap<String, Integer> getUniqueNumbersWithOccurs(List<Integer> list) {
+        TreeMap<String, Integer> numbersWithOccurs = new TreeMap<>();
+        for (int i = 1; i <= Collections.max(list); i++) {
             int occurs = 0;
             for (int j = 0; j < list.size(); j++) {
                 if (list.get(j) == i) {
                     occurs++;
                 }
             }
-            numbersWithOccurs.add(new Number(i, occurs));
+            numbersWithOccurs.put(String.valueOf(i), occurs);
         }
         return numbersWithOccurs;
     }
 
-    public void mostPopularNumberFromList(List<Number> numbers, int howManyPrint) {
-        numbers.sort(Comparator.comparingInt(Number::getHowManyTimesOccurs).reversed());
-        for (int i = 0; i < howManyPrint; i++) {
-            String info = numbers.get(i).toString();
-            System.out.println(info);
-        }
-        System.out.println();
+    public void mostPopularNumberFromList(TreeMap<String, Integer> numbers, int howManyPrint) {
+        LinkedHashMap<String, Integer> hashMap = numbers.entrySet().stream().sorted(Comparator.comparing(
+                Map.Entry<String, Integer>::getValue).reversed()).collect(
+                LinkedHashMap<String, Integer>::new,
+                (map1, e) -> map1.put(e.getKey(), e.getValue()),
+                LinkedHashMap::putAll);
+
+        LinkedHashMap<String, Integer> topXNumbers = putFirstEntries(howManyPrint, hashMap);
+
+        topXNumbers.entrySet().forEach(entry -> {
+            System.out.println(entry.getKey() + " = " + entry.getValue());
+        });
     }
+
+    public LinkedHashMap<String, Integer> putFirstEntries(int max, LinkedHashMap<String, Integer> source) {
+        int count = 0;
+        LinkedHashMap<String, Integer> target = new LinkedHashMap();
+        for (Map.Entry<String, Integer> entry : source.entrySet()) {
+            if (count >= max) break;
+
+            target.put(entry.getKey(), entry.getValue());
+            count++;
+        }
+        return target;
+    }
+
+
 }
